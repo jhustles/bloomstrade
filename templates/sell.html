@@ -1,0 +1,112 @@
+{% extends "layout.html" %}
+    <!-- This page will break down a summary of stocks -->
+
+    <!-- Display Welcome Message: first and last name -->
+    <!-- Title: Individual Brokerage -->
+
+    <!-- Account Value: Cash | Market Value Of Equities:-->
+
+    <!-- Equitites: -->
+    <!-- Stock Ticker, Company Name, Quantity (SHRS) and Price  -->
+{% block main %}
+<div class="bg-light">
+    <div class="d-flex justify-content-between" style="margin-bottom: 1%;">
+        <div>
+            <h2 style="color: black;">Account: {{ username }}</h2>
+        </div>
+        <div>
+            <h2 style="color: deeppink;">Investments | Cash Balance: {{ availableCash }}</h3>
+        </div>
+        <div>
+            <h2>{{ current_datetime }}</h2>
+        </div>
+        
+    </div>
+
+    <!-- <div class="d-flex justify-content-center" >
+        <h6>Available Cash: {{ availableCash }}</h6>
+    </div> -->
+
+    <div>
+        <table class="table table-bordered table-hover table-responsive-sm">
+                <thead>
+                    <tr>
+                        <th scope="col">Symbol</th>
+                        <th scope="col">Company</th>
+                        <th scope="col">Shares</th>
+                        <th scope="col">Cost Basis</th>
+                        <th scope="col">Market Value (USD)</th>
+                        <!-- <th scope="col">Unrealized Gain Or Loss</th> -->
+                    </tr>
+                    </thead>
+            <tbody>    
+                {% for item in items %}
+                    <tr>
+                        <td>{{ item.symbol }}</td>
+                        <td>{{ item.name }}</td>
+                        <td>{{ item.shares }}</td>
+                        <td>{{ item.costBasis }}</td>
+                        <td>{{ item.marketValue }}</td>
+                        <!-- <td>{{ item.gainLoss }}</td> -->
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Message: -->
+<div class="d-flex justify-content-center" style="color: red;">
+    <h5 class="bg-light">{{ message }}</h5>
+</div>
+
+<div class="d-flex flex-row justify-content-center" id="sell_estimator">
+    <div id="sellEstimator">
+        <form action="/sellEstimator" method="POST"> 
+            <table class="table table-bordered table-responsive-sm table-borderless th" style="background: white;">
+                <thead>
+                    <tr>
+                        <th scope="col"><label for="sellSymbol">Order Type:</label></th>
+                        <th scope="col"><label for="sellSymbol">Sell</label></th>
+                        <th><label for="sellSymbol">Curr. Ticker: </label></th>
+                        <th scope="col">
+                            <!-- <label>Stock: </label>
+                            <select name="option">
+                                {% for o in option_list %}
+                                    <option value="{{ o }}">{{ o }}</option>
+                                {% endfor %}
+                            </select> -->
+                            <input type="text" class="form-control" style="width: 50%;" name="sellSymbol" id="sellSymbol" placeholder="Symbol" onkeyup="this.value = this.value.toUpperCase()">
+                        </th>
+                    </tr>
+                </thead>
+                <div class="form-group">
+                    <tbody>
+                        <tr>
+                            <th scope="col">(Bid) Price</th>
+                            <th scope="col">{{ latestPrice }}</th>
+                            <th scope="col">{{ sellEstimateSymbol }}</th>
+                        </tr>
+                        <tr>
+                            <th scope="col">Sell Quantity</th>
+                            <th scope="col"><input type="number" min="1" class="form-control" style="width: 50%;" name="sellSharesInput" id="sellSharesInput" placeholder="#"></th>
+                            <th scope="col">Curr. Qty: {{ sellEstimateQuantity }}</th>
+                        </tr>
+                        <tr>
+                            <th scope="col">Estimated Total</th>
+                            <th scope="col">{{ sellEstimatedTotal }}</th>
+                            <th scope="col"><button class="btn btn-primary btn-sm"name="btnSellEstimate" id="btnSellEstimate" type="submit">Estimate</button></th>
+                            
+                        </tr>
+                    </tbody>
+                </div>
+            </table>
+        </form>
+        <!-- <div class="d-flex flex-row justify-content-center" id="executeSell">
+            <form action="/sell" method="POST">
+                <button class="btn btn-primary btn-sm" type="submit">Execute Order</button>
+            </form>
+        </div> -->
+    </div>
+
+{% endblock %}

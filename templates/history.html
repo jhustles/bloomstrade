@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+{% block main %}
+<div class="bg-light">
+    <div class="d-flex justify-content-between" style="margin-bottom: 1%;">
+        <div>
+            <h2 style="color: black;">Account: {{ username }}</h2>
+        </div>
+        <div>
+            <h2 style="color: deeppink;">Order History</h3>
+        </div>
+        <div>
+            <h2>{{ current_datetime }}</h2>
+        </div>
+    </div>
+    <div>
+        <table class="table table-bordered table-hover table-responsive-sm">
+                <thead>
+                    <tr>
+                        <th scope="col">Date & Time</th>
+                        <th scope="col">Order Type</th>
+                        <th scope="col">Symbol</th>
+                        <th scope="col">Company</th>
+                        <th scope="col">Shares</th>
+                        <th scope="col">Price (USD$)</th>
+                        <th scope="col">Total</th>
+                        <th scope="col">Exchange</th>
+                    </tr>
+                    </thead>
+            <tbody>    
+                {% for item in items %}
+                    <tr>
+                        <td>{{ item.datetime }}</td>
+                        <td>{{ item.ordertype }}</td>
+                        <td>{{ item.symbol }}</td>
+                        <td>{{ item.name }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.price }}</td>
+                        <td>{{ item.total }}</td>
+                        <td>{{ item.exchange }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="d-flex justify-content-center" style="color: violet;">
+    <h5 class="bg-light">{{ message }}</h5>
+</div>
+
+{% endblock %}
