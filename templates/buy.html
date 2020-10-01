@@ -1,27 +1,13 @@
 {% extends "layout.html" %}
 
 {% block main %}
-
-<!-- ON THE BUY PAGE SEND THE LOOKUP(TICKER).COPY.TEXT on the current page (extract) TO THE API. -->
-<!-- This will work if you can figure out how to use python return / make a global variable* check to see if you can do this in FLASK. -->
-
-<!-- <div>
-    {{ currentSearchHistory }}
-    {{ searchCounter }}
-</div> -->
 <div class="tickerSearchBar" style="padding-top: 3%;">
-<!-- <h1 style="color: white;">Buy Stocks</h1> -->
-<!-- Change to /quote - make sure the quote.html matches this html. will -->
-<!-- Html pages: Quote, Trade (Quote, Buy, Sell) -->
     <form action="/quote" method="POST">
         <div class="form-group d-inline-flex flex-direction-row">
             <label for="ticker" style="font-weight: bolder; margin-right: 2%; padding-top: 2%; color: deeppink;">Ticker</label>
             <input type="text" class="form-control" style="width: 40%; margin-right: 2%;" name="tickerInput" id="tickerInput" placeholder="Symbol" onkeyup="this.value = this.value.toUpperCase();">
             <button class="btn btn-primary"type="submit">Search</button>
         </div>
-        <!-- <div class="form-group">
-            <input type="text" class="form-control" name="sharesInput" id="sharesInput" placeholder="# Of Shares" type="text">
-        </div>-->
     </form>
 </div>
 
@@ -44,9 +30,6 @@
             <thead class="table-borderless th">
                 <tr>
                     <th scope="col"style="height: 50px; width: 50%;">Available Cash:    {{ availableCash }}</th>
-                    <!-- <th scope="col" style="width: 135px;">{{ availableCash }}</th> -->
-                    <!-- <th scope="col" style="width: 50%;">Total Investments:    {{totalInvestments}}</th> -->
-                    <!-- <th scope="col">{{ totalInvestments }}</th> -->
                 </tr>
             </thead>
     </div>
@@ -97,7 +80,6 @@
 </div>
 
 <div class="d-flex flex-row justify-content-center" id="buy_sell_estimator">
-    <!-- <div id="buyEstimator" style="padding-right: 2%;"> -->
     <div id="buyEstimator">
         <form action="/buyEstimator" method="POST"> 
             <table class="table table-bordered table-responsive-sm table-borderless th" style="background: white;">
@@ -135,58 +117,4 @@
             </form>
         </div> -->
     </div>
-
-
-    <!-- <div class="d-flex flex-row justify-content-center" id="sell_estimator">
-        <div id="sellEstimator">
-            <form action="/sellEstimator" method="POST"> 
-                <table class="table table-bordered table-responsive-sm table-borderless th" style="background: white;">
-                    <thead>
-                        <tr>
-                            <th scope="col">Order Type:</th>
-                            <th scope="col">Sell</th>
-                        </tr>
-                    </thead>
-                    <div class="form-group">
-                        <tbody>
-                            <tr>
-                                <th scope="col">(Bid) Price</th>
-                                <th scope="col">{{ latestPrice }}</th>
-                            </tr>
-                            <tr>
-                                <th scope="col">Sell Quantity</th>
-                                <th scope="col"><input type="number" min="1" class="form-control" style="width: 50%;" name="sellSharesInput" id="sellSharesInput" placeholder="#"></th>
-                                <th scope="col">Curr. Qty: {{ sellSharesInput }}</th>
-                            </tr>
-                            <tr>
-                                <th scope="col">Estimated Total</th>
-                                <th scope="col">{{ estimatedSellTotal }}</th>
-                                <th scope="col"><button class="btn btn-primary btn-sm"name="btnSellEstimate" id="btnSellEstimate" type="submit">Estimate</button></th>
-                            </tr>
-                        </tbody>
-                    </div>
-                </table>
-            </form>
-            <div class="d-flex flex-row justify-content-center" id="executeSell">
-                <form action="/sell" method="POST">
-                    <button class="btn btn-primary btn-sm" type="submit">Execute Order</button>
-                </form>
-            </div>
-        </div> -->
-
-<!-- <div style="color: white;">
-    {{ tickerInput }}
-{{  username }}
-{{  current_datetime }}
-{{  availableCash }}
-{{  companyName }}
-{{  price }}
-{{  symbol }}
-{{  bidPrice }}
-{{  askPrice }}
-{{  sharesInput }}
-{{ estimatedTotal }}
-{{ display }}
-</div> -->
-
 {% endblock %}
