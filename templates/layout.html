@@ -35,8 +35,7 @@
     <div class="container-fluid d-flex d-md-inline-flex-row justify-content-between">
 
       <h1 class="logo d-flex align-items-center"><a href="/">Bloom$-Trade</a></h1>
-      <!-- Uncomment below if you prefer to use an image logo -->
-      <!-- <a href="index.html" class="logo"><img src="assets/img/logo.png" alt="" class="img-fluid"></a>-->
+
 
       <nav class="nav-menu d-none d-lg-block justify-content-end align-items-center" style=margin-right:8px;>
         {% if session.user_id %}
@@ -64,11 +63,6 @@
 
   <!-- ======= Hero Section ======= -->
   <section id="hero" class="d-flex align-items-center">
-    <!-- <div class="container d-flex flex-column align-items-center" data-aos="zoom-in" data-aos-delay="100">
-      <h1>Kelly Adams</h1>
-      <h2>I'm a professional illustrator from San Francisco</h2>
-      <a href="about.html" class="btn-about">About Me</a>
-    </div> -->
     {% if get_flashed_messages() %}
         <header>
             <div class="alert alert-primary border text-center" role="alert">
@@ -79,17 +73,11 @@
 
 
     <div class="container d-flex flex-column align-items-center" data-aos="zoom-in" data-aos-delay="100">
-
       <!-- MAIN BLOCK  -->
       <main id=main class="container">
         {% block main %}{% endblock %}
       </main>
-      
-      <!-- <h1>Kelly Adams</h1>
-      <h2>I'm a professional illustrator from San Francisco</h2>
-      <a href="about.html" class="btn-about">Login</a> -->
     </div>
-
   </section><!-- End Hero -->
 
 
@@ -126,9 +114,15 @@
   <script src="static/vendor/aos/aos.js"></script>
   <!-- Template Main JS File -->
   <script src="static/js/main.js"></script>
-  <script src="static/js/logic.js"></script>
 </body>
 </html>
+
+
+
+
+
+
+
 
   <!-- =======================================================
   * Template Name: Kelly - v2.0.0
