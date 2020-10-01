@@ -101,7 +101,6 @@ def index():
         # stock['gainLoss'] = usd(float(stock['marketValue']) - float(stock['costBasis']))
         portfolioBalances.append(stock)
 
-
     if request.method == "GET":
         return render_template("index.html",
                                 username=userInfo['username'],
@@ -123,7 +122,6 @@ def quote():
     currentSearchHistory = []
     searchResultsHistory = []
 
-    
     results = db.execute("SELECT username, cash FROM users WHERE id = :user_id", user_id=userInfo['user_id']) #[0]["username"]
     availableCash = results[0]["cash"]
     tickerInput = request.form.get("tickerInput")
@@ -417,7 +415,6 @@ def history():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     """Log user in"""
-
     # Forget any user_id
     session.clear()
 
@@ -438,7 +435,6 @@ def login():
             return apology("must provide password", 403)
 
         # Query database for username
-        # Original with cs50
         rows = db.execute("SELECT * FROM users WHERE username = :username", username=username)
         
 
@@ -522,8 +518,7 @@ def register():
 @app.route("/sellEstimator", methods=["GET", "POST"])
 @login_required
 def sellEstimator():
-    message = ""
-    #user_id=session["user_id"] # when user logs in with correct username and pw, it will pull the user-id from SQL db
+    #message=""
     userCash = db.execute("SELECT username, cash FROM users WHERE id = :user_id", user_id=userInfo['user_id']) #[0]["username"]
     availableCash = userCash[0]["cash"]
     if request.method == "GET":
@@ -548,10 +543,7 @@ def sellEstimator():
             return render_template("sell.html", availableCash=usd(availableCash), message="Portfolio is currently empty. No items to sell.")
         
         else: # data is available in the database, then gather it first and setup data structure
-
-            # portfolioBalances = []
             for i in range(len(portfolioSymbols)):
-                #marketValues.append(portfolioQuantities[i]*marketPrices[i])
                 stock = {}
                 stock['symbol'] = portfolioSymbols[i]
                 stock['name'] = cnames[i]
@@ -570,11 +562,10 @@ def sellEstimator():
         return render_template("sell.html", username=portfolioBalances[-1]['username'], availableCash=usd(availableCash), items=portfolioBalances, current_datetime=current_datetime)
 
     else: # if request.method == "POST":
-        
+        # Need to be able to access these variables in the next page route /sell
         global sellEstimatedTotal # will pass this into the buy function | will need to differentiate for buy / sell 
         global sellSharesInput
 
-        # option = request.form.get("option")
         sellSymbol = request.form.get("sellSymbol").upper()
         sellSharesInput = request.form.get("sellSharesInput")
 
