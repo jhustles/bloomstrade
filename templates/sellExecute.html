@@ -58,12 +58,7 @@
                         <th scope="col"><label for="sellSymbol">Sell</label></th>
                         <th><label for="sellSymbol">Ticker: </label></th>
                         <th scope="col">
-                            <!-- <label>Stock: </label>
-                            <select name="option">
-                                {% for o in option_list %}
-                                    <option value="{{ o }}">{{ o }}</option>
-                                {% endfor %}
-                            </select> -->
+
                             <input type="text" class="form-control" style="width: 50%;" name="sellSymbol" id="sellSymbol" placeholder="Symbol" onkeyup="this.value = this.value.toUpperCase()">
                         </th>
                     </tr>
