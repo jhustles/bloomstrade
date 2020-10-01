@@ -1,12 +1,12 @@
 {% extends "layout.html" %}
 
 {% block main %}
-    <div>
+    <div class="bg-light">
         <div class="bodyTitles">
             <h2>New Account Registration</h2>
             <h3>{{ message }}</h3>
         </div>
-        <div>
+        <div class="d-flex justify-content-center">
             <form action="/register" method="POST">
                 <div class="form-group flex-direction-row">
                     <label for="firstName">First Name</label>
