@@ -15,8 +15,6 @@
             <thead class="table-borderless th">
                 <tr>
                     <th scope="col"style="height: 50px; width: 50%;">User: {{ username }}</th>
-                    <!-- <th scope="col"></th> -->
-                    <!-- <th scope="col"></th> -->
                     <th scope="col"style="text-align:right"> {{ current_datetime }}</th>
                 </tr>
             </thead>
@@ -26,9 +24,6 @@
             <thead class="table-borderless th">
                 <tr>
                     <th scope="col"style="height: 50px; width: 50%;">Available Cash:    {{ availableCash }}</th>
-                    <!-- <th scope="col" style="width: 135px;">{{ availableCash }}</th> -->
-                    <!-- <th scope="col" style="width: 50%;">Total Investments:    {{totalInvestments}}</th> -->
-                    <!-- <th scope="col">{{ totalInvestments }}</th> -->
                 </tr>
             </thead>
     </div>
@@ -108,7 +103,6 @@
             </table>
         </form>
         <div class="d-flex flex-row justify-content-center" id="executeBuy">
-            <!-- <button class="btn btn-primary btn-sm"name="btnBuyEstimate" id="btnBuyEstimate" type="submit">Estimate Order </button> -->
             <form action="/buy" method="POST">
                 <button class="btn btn-primary btn-sm" type="submit">Execute Order</button>
             </form>

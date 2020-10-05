@@ -1,5 +1,4 @@
 {% extends "layout.html" %}
-
 {% block main %}
 <div class="bg-light">
     <div class="d-flex justify-content-between" style="margin-bottom: 1%;">
@@ -12,9 +11,7 @@
         <div>
             <h2>{{ current_datetime }}</h2>
         </div>
-        
     </div>
-
     <div>
         <table class="table table-bordered table-hover table-responsive-sm">
                 <thead>
@@ -35,19 +32,16 @@
                         <td>{{ item.shares }}</td>
                         <td>{{ item.costBasis }}</td>
                         <td>{{ item.marketValue }}</td>
-                        <!-- <td>{{ item.gainLoss }}</td> -->
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
-
 <!-- Message: -->
 <div class="d-flex justify-content-center" style="color: red;">
     <h5 class="bg-light">{{ message }}</h5>
 </div>
-
 <div class="d-flex flex-row justify-content-center" id="sell_estimator">
     <div id="sellEstimator">
         <form action="/sellEstimator" method="POST"> 
@@ -57,9 +51,6 @@
                         <th scope="col"><label for="sellSymbol">Order Type:</label></th>
                         <th scope="col"><label for="sellSymbol">Sell</label></th>
                         <th><label for="sellSymbol"><input type="text" class="form-control" style="width: 75%;" name="sellSymbol" id="sellSymbol" placeholder="Enter Symbol" onkeyup="this.value = this.value.toUpperCase()"></label></th>
-                        <!-- <th scope="col">
-                            
-                        </th> -->
                     </tr>
                 </thead>
                 <div class="form-group">
@@ -89,5 +80,4 @@
             </form>
         </div>
     </div>
-
 {% endblock %}

@@ -6,39 +6,21 @@
   <title>Bloom$Trade</title>
   <meta content="" name="descriptison">
   <meta content="" name="keywords">
-
   <!-- Favicons -->
   <link href="static/img/favicon.png" rel="icon">
   <link href="static/img/apple-touch-icon.png" rel="apple-touch-icon">
-
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
-
-  <!-- Vendor CSS Files -->
-  <!-- <link href="static/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet"> -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-
-  <link href="static/vendor/icofont/icofont.min.css" rel="stylesheet">
-  <!-- <link href="static/vendor/owl.carousel/static/owl.carousel.min.css" rel="stylesheet"> -->
-  <!-- <link href="static/vendor/boxicons/css/boxicons.min.css" rel="stylesheet"> -->
   <!-- Boxicons - Use Online CDN -->
   <link href='https://cdn.jsdelivr.net/npm/boxicons@2.0.5/css/boxicons.min.css' rel='stylesheet'>
-  <!-- <link href="static/vendor/venobox/venobox.css" rel="stylesheet"> -->
-
-
   <!-- Animate on scroll - used CDN link instead -->
-  <!-- <link href="static/vendor/aos/aos.css" rel="stylesheet"> -->
   <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-
   <!-- Boxicons -->
   <link href='https://unpkg.com/boxicons@2.0.5/css/boxicons.min.css' rel='stylesheet'>
-
   <!-- Template Main CSS File -->
   <link href="static/css/style.css" rel="stylesheet">
-
-
 </head>
-
 <body>
   <!-- ======= Header ======= -->
   <header id="header" class="fixed-top">
@@ -49,25 +31,20 @@
             <ul class="navbar-nav flex-row justify-content-end mr-auto mt-2">
                 <li class="nav-item"><a class="nav-link" href="/">Portfolio</a></li>
                 <li class="nav-item"><a class="nav-link" href="/quote">Quote & Buy</a></li>
-                <!-- <li class="nav-item"><a class="nav-link" href="/buy">Buy</a></li> -->
                 <li class="nav-item"><a class="nav-link" href="/sellEstimator">Sell</a></li>
                 <li class="nav-item"><a class="nav-link" href="/history">History</a></li>
                 <li class="nav-item"><a class="nav-link" href="/logout">Log Out</a></li>
             </ul>
         {% else %}
-            <!-- <ul class="navbar-nav ml-auto mt-2"> -->
             <ul class="navbar-nav flex-row justify-content-end mr-auto mt-2" style=margin-right:8px;>
                 <li class="nav-item"><a class="nav-link" href="/register">Register</a></li>
                 <li class="nav-item"><a class="nav-link" href="/login">Log In</a></li>
             </ul>
         {% endif %}
       </nav><!-- .nav-menu -->
-
     </div>
-
   </header><!-- End Header -->
-
-  <!-- ======= Hero Section ======= -->
+  <!-- ======= Hero Body Section ======= -->
   <section id="hero" class="d-flex align-items-center">
     {% if get_flashed_messages() %}
         <header>
@@ -76,8 +53,6 @@
             </div>
         </header>
     {% endif %}
-
-
     <div class="container d-flex flex-column align-items-center" data-aos="zoom-in" data-aos-delay="100">
       <!-- MAIN BLOCK  -->
       <main id=main class="container">
@@ -85,10 +60,6 @@
       </main>
     </div>
   </section><!-- End Hero -->
-
-
-
-
   <!-- ======= Footer ======= -->
   <footer id="footer">
     <div class="container">
@@ -106,39 +77,18 @@
 
   <div id="preloader"></div>
   <a href="#" class="back-to-top"><i class="bx bx-up-arrow-alt"></i></a>
-
   <!-- Vendor JS Files -->
-  <!-- <script src="static/vendor/jquery/jquery.min.js"></script>
-  <script src="static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="static/vendor/jquery.easing/jquery.easing.min.js"></script> -->
-
-
-
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
   <!-- Third party plugin JS-->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
-  <!-- <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script> -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-  <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script> -->
-  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script> -->
-
-  <!-- <script src="static/vendor/php-email-form/validate.js"></script> -->
-  <!-- <script src="static/vendor/waypoints/jquery.waypoints.min.js"></script> -->
   <script src="https://pagecdn.io/lib/waypoints/4.0.1/jquery.waypoints.min.js" crossorigin="anonymous" integrity="sha256-jDnOKIOq2KNsQZTcBTEnsp76FnfMEttF6AV2DF2fFNE=" ></script>
-  <!-- <script src="static/vendor/counterup/counterup.min.js"></script>
-  <script src="static/vendor/owl.carousel/owl.carousel.min.js"></script> -->
-<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/Counter-Up/1.0.0/jquery.counterup.min.js"></script> -->
-
-  <!-- <script src="static/vendor/isotope-layout/isotope.pkgd.min.js"></script> -->
-  <!-- <script src="static/vendor/venobox/venobox.min.js"></script> -->
-  <!-- <script src="static/vendor/aos/aos.js"></script> -->
   <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
   <!-- Template Main JS File -->
   <script src="static/js/main.js"></script>
   <script src="https://unpkg.com/ionicons@5.1.2/dist/ionicons.js"></script>
 <!-- boxicons -->
-
 </body>
 </html>
 

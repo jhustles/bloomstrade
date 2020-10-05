@@ -477,7 +477,7 @@ def register():
 
     """Register user"""
     if request.method == "GET": #Render the register.html page
-        return render_template("registerdraft.html", message="")
+        return render_template("register.html", message="")
 
     else: # else if, you're already on the page, and want to submit results back to the API, use method = "POST"
         if not first_name:

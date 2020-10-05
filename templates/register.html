@@ -1,44 +1,40 @@
 {% extends "layout.html" %}
 
 {% block main %}
-    <div class="bg-light">
-        <div class="bodyTitles">
-            <h2>New Account Registration</h2>
-            <h3>{{ message }}</h3>
-        </div>
-        <div class="d-flex justify-content-center">
-            <form action="/register" method="POST">
-                <div class="form-group flex-direction-row">
-                    <label for="firstName">First Name</label>
-                    <input type="text" placeholder="John" name="firstName" id="firstName" required>
-                </div>
-                <div class="form-group flex-direction-row">
-                    <label for="lastName">Last Name</label>
-                    <input type="text" placeholder="Doe" name="lastName"  id="lastName" required>
-                </div>
-                <div class="bodyTitles">
-                    <h2>Create Username & Password</h2>
-                </div>
-                <div class="form-group">
-                    <label for="username">Username:</label>
-                    <input type="text" placeholder="Enter here" name="username" id="username" required>
-                </div>
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="text" placeholder="Enter here" name="password"  id="password" required><hr>
-                </div>
-                <div class="form-group">
-                    <label for="passwordConfirm">Password Reconfirmation</label>
-                    <input type="text" placeholder="Re-enter password here." name="passwordConfirm"  id="passwordConfirm" required><hr>
-                </div>
-                <div class="form-group"></div>
-                <input type="submit">
+<div class="wrapper">
+    <h3 style="color: white;">{{ message }}</h3>
+    <div class="container col-6 d-flex justify-content-center bg-light">
+        <form action="/register" method="POST">
+            <h3 style="text-align: center; padding: 3pc; ">Account Registration Form</h3>
+            <div class="form-group">
+                <input type="text" style="margin-bottom: 2pt;" placeholder="First Name" name="firstName" class="form-control" required>
+                <input type="text" placeholder="Last Name" name=lastName class="form-control" required>
+            </div>
+            <div class="form-wrapper flex-direction-row">
+                <input type="text" placeholder="Username" name="username" class="form-control" required>
+                <i class='bx bx-user'></i>
+            </div>
+            <div class="form-wrapper">
+                <input type="text" placeholder="Email Address" name="emailAddress" class="form-control" required>
+                <i class='bx bx-mail-send' ></i>
+            </div>
+            <div class="form-wrapper">
+                <input type="password" placeholder="Password" name="password" class="form-control"required>
+                <i class='bx bx-lock' ></i>
+            </div>
+            <div class="form-wrapper">
+                <input type="password" placeholder="Confirm Password" name="passwordConfirm" class="form-control"required>
+                <i class='bx bx-lock' ></i>
+            </div>
+            <button type="submit">Register
+                <i class='bx bxs-arrow-to-right' ></i>
+            </button>
+            <div class="form-group" style="size: 80pc;"></div>
                 <label for="member">Already Have An Account?</label>
-                    <a href="/login.html">Proceed to Login page</a>
-                </div>
-            </form>
-        </div>
+                    <a href="/login.html" style="padding-bottom: 3pc;">Proceed to Login page</a>
+            </div>
+        </form>
+        <br>
     </div>
-
-
+</div>
 {% endblock %}
