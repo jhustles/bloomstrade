@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>Blooms</title>
+  <title>Bloom$Trade</title>
   <meta content="" name="descriptison">
   <meta content="" name="keywords">
 
@@ -15,12 +15,23 @@
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
 
   <!-- Vendor CSS Files -->
-  <link href="static/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <!-- <link href="static/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet"> -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
   <link href="static/vendor/icofont/icofont.min.css" rel="stylesheet">
-  <link href="static/vendor/owl.carousel/static/owl.carousel.min.css" rel="stylesheet">
-  <link href="static/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
-  <link href="static/vendor/venobox/venobox.css" rel="stylesheet">
-  <link href="static/vendor/aos/aos.css" rel="stylesheet">
+  <!-- <link href="static/vendor/owl.carousel/static/owl.carousel.min.css" rel="stylesheet"> -->
+  <!-- <link href="static/vendor/boxicons/css/boxicons.min.css" rel="stylesheet"> -->
+  <!-- Boxicons - Use Online CDN -->
+  <link href='https://cdn.jsdelivr.net/npm/boxicons@2.0.5/css/boxicons.min.css' rel='stylesheet'>
+  <!-- <link href="static/vendor/venobox/venobox.css" rel="stylesheet"> -->
+
+
+  <!-- Animate on scroll - used CDN link instead -->
+  <!-- <link href="static/vendor/aos/aos.css" rel="stylesheet"> -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+  <!-- Boxicons -->
+  <link href='https://unpkg.com/boxicons@2.0.5/css/boxicons.min.css' rel='stylesheet'>
 
   <!-- Template Main CSS File -->
   <link href="static/css/style.css" rel="stylesheet">
@@ -29,14 +40,10 @@
 </head>
 
 <body>
-
   <!-- ======= Header ======= -->
   <header id="header" class="fixed-top">
     <div class="container-fluid d-flex d-md-inline-flex-row justify-content-between">
-
       <h1 class="logo d-flex align-items-center"><a href="/">Bloom$-Trade</a></h1>
-
-
       <nav class="nav-menu d-none d-lg-block justify-content-end align-items-center" style=margin-right:8px;>
         {% if session.user_id %}
             <ul class="navbar-nav flex-row justify-content-end mr-auto mt-2">
@@ -47,7 +54,6 @@
                 <li class="nav-item"><a class="nav-link" href="/history">History</a></li>
                 <li class="nav-item"><a class="nav-link" href="/logout">Log Out</a></li>
             </ul>
-
         {% else %}
             <!-- <ul class="navbar-nav ml-auto mt-2"> -->
             <ul class="navbar-nav flex-row justify-content-end mr-auto mt-2" style=margin-right:8px;>
@@ -90,10 +96,10 @@
       <div class="credits">
         Source: <a href="https://iextrading.com/developer">IEX</a> |
         View <a href="https://iextrading.com/api-exhibit-a/">IEX’s Terms of Use</a> | 
-        <a href="#" class="twitter"><i class="icofont-twitter"></i></a> | 
-        <a href="#" class="facebook"><i class="icofont-facebook"></i></a> | 
-        <a href="#" class="instagram"><i class="icofont-instagram"></i></a> | 
-        <a href="#" class="linkedin"><i class="icofont-linkedin"></i></i></a>
+        <a href="#" class="twitter"><ion-icon name="logo-twitter"></ion-icon></a> | 
+        <a href="#" class="facebook"><ion-icon name="logo-facebook"></ion-icon></a> | 
+        <a href="#" class="instagram"><ion-icon name="logo-instagram"></ion-icon></a> | 
+        <a href="#" class="linkedin"><ion-icon name="logo-linkedin"></ion-icon></a>
       </div>
     </div>
   </footer><!-- End  Footer -->
@@ -102,26 +108,39 @@
   <a href="#" class="back-to-top"><i class="bx bx-up-arrow-alt"></i></a>
 
   <!-- Vendor JS Files -->
-  <script src="static/vendor/jquery/jquery.min.js"></script>
+  <!-- <script src="static/vendor/jquery/jquery.min.js"></script>
   <script src="static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="static/vendor/jquery.easing/jquery.easing.min.js"></script>
+  <script src="static/vendor/jquery.easing/jquery.easing.min.js"></script> -->
+
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+  <!-- Third party plugin JS-->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
+  <!-- <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script> -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+  <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script> -->
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script> -->
+
   <!-- <script src="static/vendor/php-email-form/validate.js"></script> -->
-  <script src="static/vendor/waypoints/jquery.waypoints.min.js"></script>
-  <script src="static/vendor/counterup/counterup.min.js"></script>
-  <script src="static/vendor/owl.carousel/owl.carousel.min.js"></script>
-  <script src="static/vendor/isotope-layout/isotope.pkgd.min.js"></script>
-  <script src="static/vendor/venobox/venobox.min.js"></script>
-  <script src="static/vendor/aos/aos.js"></script>
+  <!-- <script src="static/vendor/waypoints/jquery.waypoints.min.js"></script> -->
+  <script src="https://pagecdn.io/lib/waypoints/4.0.1/jquery.waypoints.min.js" crossorigin="anonymous" integrity="sha256-jDnOKIOq2KNsQZTcBTEnsp76FnfMEttF6AV2DF2fFNE=" ></script>
+  <!-- <script src="static/vendor/counterup/counterup.min.js"></script>
+  <script src="static/vendor/owl.carousel/owl.carousel.min.js"></script> -->
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/Counter-Up/1.0.0/jquery.counterup.min.js"></script> -->
+
+  <!-- <script src="static/vendor/isotope-layout/isotope.pkgd.min.js"></script> -->
+  <!-- <script src="static/vendor/venobox/venobox.min.js"></script> -->
+  <!-- <script src="static/vendor/aos/aos.js"></script> -->
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
   <!-- Template Main JS File -->
   <script src="static/js/main.js"></script>
+  <script src="https://unpkg.com/ionicons@5.1.2/dist/ionicons.js"></script>
+<!-- boxicons -->
+
 </body>
 </html>
-
-
-
-
-
-
 
 
   <!-- =======================================================

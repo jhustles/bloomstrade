@@ -67,17 +67,19 @@ def index():
     """Show portfolio of stocks"""
 
     user_id=session["user_id"]
+    # Add key user_id to userInfo dictionary
     userInfo['user_id'] = user_id # global object
     
     items = db.execute("WITH indexSetup AS ( SELECT u.username, c.symbol,  c.name, t.c_id, t.ordertype, SUM(t.quantity) as quantity, SUM(t.quantity * t.price) AS total FROM transactions t JOIN companies c ON t.c_id = c.id JOIN users u ON t.user_id = u.id WHERE user_id =:user_id GROUP BY  u.username, c.symbol, c.name, t.c_id, t.ordertype), sell as (SELECT username, symbol,  name, c_id, SUM(quantity) as quantity , SUM(total) AS costBasis FROM indexSetup WHERE ordertype = 'SELL' GROUP BY 1, 2, 3, 4), buy AS ( SELECT username, symbol,  name, c_id, SUM(quantity) as quantity , SUM(total) AS costBasis FROM indexSetup WHERE ordertype = 'BUY' GROUP BY 1, 2, 3, 4) SELECT username, symbol,  name, c_id, COALESCE(SUM(b.quantity - s.quantity), b.quantity) as quantity, COALESCE(SUM(b.costBasis - s.CostBasis), b.costBasis)  AS total FROM buy b LEFT JOIN sell s USING(username, symbol, name, c_id) GROUP BY 1, 2, 3, 4 ORDER BY name", user_id=userInfo['user_id'])
     userCash = db.execute("SELECT username, cash FROM users WHERE id = :user_id", user_id=userInfo['user_id']) #[0]["username"]
+    userInfo['username'] = userCash[0]['username']
     availableCash = userCash[0]["cash"]
 
     if not items:
-        return render_template("index.html", message="Portfolio is currently empty")
+        return render_template("index.html", username=userCash[0]['username'],message="Portfolio is currently empty", availableCash=usd(availableCash), user_id=user_id, current_datetime=current_datetime)
 
-    users = [i['username'] for i in items][0]
-    userInfo['username'] = users
+    # Set the username key to the actual username value
+    
 
     portfolioSymbols = [i['symbol'] for i in items]
     portfolioQuantities = [i['quantity'] for i in items]
@@ -128,7 +130,7 @@ def quote():
 
     if request.method == "GET":
         return render_template("quote1.html",
-                                username=userInfo['username'],
+                                username=results[0]['username'],
                                 availableCash=usd(availableCash),
                                 current_datetime=current_datetime)
     else: # else if POST
@@ -151,14 +153,14 @@ def quote():
         # LookUp symbol to ensure it's valid on POST
         if not lookup(tickerInput):
             message = "Invalid Ticker Symbol. Please try another."
-            return render_template("quote1.html", username=userInfo['username'], availableCash=usd(availableCash), current_datetime=current_datetime, message=message)
+            return render_template("quote1.html", username=results[0]['username'], availableCash=usd(availableCash), current_datetime=current_datetime, message=message)
 
         # Increment the search counter for a successful search
         searchCounter += 1
 
         lookUpResults = {
             'search_id' : searchCounter,
-            'username' : userInfo['username'],
+            'username' : results[0]['username'],
             'availableCash' : availableCash,
             'current_datetime': current_datetime,
             'companyName' : quote["name"],
@@ -175,7 +177,7 @@ def quote():
             }
         searchResultsHistory.append(lookUpResults)
 
-        return render_template("buy.html",username=userInfo['username'],
+        return render_template("buy.html",username=results[0]['username'],
                                             current_datetime=current_datetime,
                                             availableCash=usd(results[0]['cash']),
                                             companyName=searchResultsHistory[-1]['companyName'].upper(),
@@ -469,12 +471,13 @@ def register():
     first_name = request.form.get("firstName")
     last_name = request.form.get("lastName")
     username = request.form.get("username")
+    emailAddress = request.form.get("emailAddress")
     password = request.form.get("password")
     password_confirmation = request.form.get("passwordConfirm")
 
     """Register user"""
     if request.method == "GET": #Render the register.html page
-        return render_template("register.html", message="")
+        return render_template("registerdraft.html", message="")
 
     else: # else if, you're already on the page, and want to submit results back to the API, use method = "POST"
         if not first_name:
@@ -495,16 +498,18 @@ def register():
         if password != password_confirmation:
             return render_template("register.html", message="Your passwords must match before we proceed.")
             
-        # Check for Duplicate username
-        username_result = db.execute("SELECT username FROM users WHERE username = :username", username=request.form.get("username"))
+        # Check for Duplicate username and email address
+        username_result = db.execute("SELECT username FROM users WHERE username = :username", username=username)
+        email_result = db.execute("SELECT email_address FROM names WHERE email_address = :emailAddress", emailAddress=emailAddress)
         if len(username_result) >= 1:
             return render_template("register.html", message="Sorry this username is already taken.")
-
+        elif len(email_result) >= 1:
+            return render_template("register.html", message="Sorry this email address is already taken. Perhaps you forogt your password?")
         else:
             hash_pass = generate_password_hash(password)
             db.execute("INSERT INTO users (username, hash) VALUES(:username, :hash)", username=username, hash=hash_pass)
-            user_id = db.execute("SELECT id FROM users WHERE username = :username", username=username)
-            db.execute("INSERT INTO names (first_name, last_name) VALUES (:first_name, :last_name)", first_name=first_name, last_name=last_name)
+            user_id = db.execute("SELECT id FROM users WHERE username = :username", username=username)[0]['id']
+            db.execute("INSERT INTO names (first_name, last_name, email_address) VALUES (:first_name, :last_name, :emailAddress)", first_name=first_name, last_name=last_name, emailAddress=emailAddress)
             db.execute("INSERT INTO cash (datetime, debit, credit, trans_id, user_id) VALUES(:datetime, :debit, :credit, :trans_id, :user_id)",
                             datetime=current_datetime,
                             debit=10000,
@@ -525,7 +530,6 @@ def sellEstimator():
         counter = 0
         if counter == 0:
             try:
-                
                 items = db.execute("WITH indexSetup AS ( SELECT u.username, c.symbol,  c.name, t.c_id, t.ordertype, SUM(t.quantity) as quantity, SUM(t.quantity * t.price) AS total FROM transactions t JOIN companies c ON t.c_id = c.id JOIN users u ON t.user_id = u.id WHERE user_id =:user_id GROUP BY  u.username, c.symbol, c.name, t.c_id, t.ordertype), sell as (SELECT username, symbol,  name, c_id, SUM(quantity) as quantity , SUM(total) AS costBasis FROM indexSetup WHERE ordertype = 'SELL' GROUP BY 1, 2, 3, 4), buy AS ( SELECT username, symbol,  name, c_id, SUM(quantity) as quantity , SUM(total) AS costBasis FROM indexSetup WHERE ordertype = 'BUY' GROUP BY 1, 2, 3, 4) SELECT username, symbol,  name, c_id, COALESCE(SUM(b.quantity - s.quantity), b.quantity) as quantity, COALESCE(SUM(b.costBasis - s.CostBasis), b.costBasis)  AS total FROM buy b LEFT JOIN sell s USING(username, symbol, name, c_id) GROUP BY 1, 2, 3, 4 ORDER BY name", user_id=userInfo['user_id'])
                 # users = [i['username'] for i in items][0]
                 global portfolioSymbols
@@ -535,7 +539,6 @@ def sellEstimator():
                 cnames = [i['name'] for i in items]
                 marketPrices = [lookup(i)['price'] for i in portfolioSymbols]
                 time.sleep(2)
-                
             except Exception as e:
                 print(e)
 

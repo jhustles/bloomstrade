@@ -415,7 +415,7 @@ h1, h2, h3, h4, h5, h6 {
 
 #hero {
   width: 100%;
-  height: 100vh;
+  height: 96vh;
   /* padding-top: 8%; */
   /* padding-bottom: 8%; */
   background: url("../img/hero-bg.jpg") top right;
