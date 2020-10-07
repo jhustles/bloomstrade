@@ -1,5 +1,4 @@
-# NewEgg.com WebScraper And Crawler For Laptops
-## April 2020
+# BloomsTrade - Free Stock Trading Web Application Using Real-Time Quotes From API
 
 
 ![about](./readme_pics/0_about.png)
@@ -56,7 +55,7 @@ You will need the following installed on your computer system and import the fol
 ## Web Application Walkthrough
 
 * Account Registration Page - all fields must be complete or application will return an error message
-![registration](./readme_pics/2_registration.png)
+![registration](./readme_pics/1_registration.png)
 
 * Registration Error - Example of an error message if a field is missing
 ![registrationError](./readme_pics/2_registration.png)
