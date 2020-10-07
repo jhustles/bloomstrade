@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+{% block main %}
+<div class="bg-light">
+    <div class="d-flex justify-content-between" style="margin-bottom: 1%;">
+        <div>
+            <h2 style="color: black;">Account: {{ username }}</h2>
+        </div>
+        <div>
+            <h2 style="color: deeppink;">Investments | Cash Balance: {{ availableCash }}</h3>
+        </div>
+        <div>
+            <h2>{{ current_datetime }}</h2>
+        </div>
+    </div>
+    <div>
+        <table class="table table-bordered table-hover table-responsive-sm">
+                <thead>
+                    <tr>
+                        <th scope="col">Symbol</th>
+                        <th scope="col">Company</th>
+                        <th scope="col">Shares</th>
+                        <th scope="col">Cost Basis</th>
+                        <th scope="col">Market Value (USD)</th>
+                        <!-- <th scope="col">Unrealized Gain Or Loss</th> -->
+                    </tr>
+                    </thead>
+            <tbody>    
+                {% for item in items %}
+                    <tr>
+                        <td>{{ item.symbol }}</td>
+                        <td>{{ item.name }}</td>
+                        <td>{{ item.shares }}</td>
+                        <td>{{ item.costBasis }}</td>
+                        <td>{{ item.marketValue }}</td>
+                        <!-- <td>{{ item.gainLoss }}</td> -->
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<!-- Message: -->
+<div class="d-flex justify-content-center" style="color: red;">
+    <h5 class="bg-light">{{ message }}</h5>
+
+{% endblock %}

@@ -1,5 +1,5 @@
 import os
-import datetime
+from datetime import datetime
 import time
 from cs50 import SQL
 # import sqlite3 as sl
@@ -8,7 +8,6 @@ from flask_session import Session
 from tempfile import mkdtemp
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import check_password_hash, generate_password_hash
-
 from helpers import apology, login_required, lookup, usd
 # from config import API_KEY
 
@@ -18,11 +17,9 @@ app = Flask(__name__)
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 
+# Global Variables that will be used between different pages
 global current_datetime
-current_datetime = datetime.datetime.now().strftime("%c")
-
-global userInfo # create userInfo object to store username and user_id used in all functions.
-userInfo = {}
+current_datetime = datetime
 
 global buyEstimatesArray
 buyEstimatesArray = []
@@ -34,6 +31,7 @@ global portfolioBalances
 portfolioBalances = []
 
 global portfolioSymbols
+
 
 # Ensure responses aren't cached
 @app.after_request
@@ -65,52 +63,44 @@ if not os.environ.get("API_KEY"):
 @login_required #We're saying the user must be logged to use this
 def index():
     """Show portfolio of stocks"""
-
-    user_id=session["user_id"]
-    # Add key user_id to userInfo dictionary
-    userInfo['user_id'] = user_id # global object
+    items = db.execute("WITH indexSetup AS ( SELECT u.username, c.symbol,  c.name, t.c_id, t.ordertype, SUM(t.quantity) as quantity, SUM(t.quantity * t.price) AS total FROM transactions t JOIN companies c ON t.c_id = c.id JOIN users u ON t.user_id = u.id WHERE user_id =:user_id GROUP BY  u.username, c.symbol, c.name, t.c_id, t.ordertype), sell as (SELECT username, symbol,  name, c_id, SUM(quantity) as quantity , SUM(total) AS costBasis FROM indexSetup WHERE ordertype = 'SELL' GROUP BY 1, 2, 3, 4), buy AS ( SELECT username, symbol,  name, c_id, SUM(quantity) as quantity , SUM(total) AS costBasis FROM indexSetup WHERE ordertype = 'BUY' GROUP BY 1, 2, 3, 4) ,results AS(SELECT username, symbol,  name, c_id, COALESCE(SUM(b.quantity - s.quantity), b.quantity) as quantity, COALESCE(SUM(b.costBasis - s.CostBasis), b.costBasis)  AS total FROM buy b LEFT JOIN sell s USING(username, symbol, name, c_id) GROUP BY 1, 2, 3, 4 ORDER BY name) SELECT * FROM results WHERE quantity > 0", user_id=session["user_id"])
     
-    items = db.execute("WITH indexSetup AS ( SELECT u.username, c.symbol,  c.name, t.c_id, t.ordertype, SUM(t.quantity) as quantity, SUM(t.quantity * t.price) AS total FROM transactions t JOIN companies c ON t.c_id = c.id JOIN users u ON t.user_id = u.id WHERE user_id =:user_id GROUP BY  u.username, c.symbol, c.name, t.c_id, t.ordertype), sell as (SELECT username, symbol,  name, c_id, SUM(quantity) as quantity , SUM(total) AS costBasis FROM indexSetup WHERE ordertype = 'SELL' GROUP BY 1, 2, 3, 4), buy AS ( SELECT username, symbol,  name, c_id, SUM(quantity) as quantity , SUM(total) AS costBasis FROM indexSetup WHERE ordertype = 'BUY' GROUP BY 1, 2, 3, 4) SELECT username, symbol,  name, c_id, COALESCE(SUM(b.quantity - s.quantity), b.quantity) as quantity, COALESCE(SUM(b.costBasis - s.CostBasis), b.costBasis)  AS total FROM buy b LEFT JOIN sell s USING(username, symbol, name, c_id) GROUP BY 1, 2, 3, 4 ORDER BY name", user_id=userInfo['user_id'])
-    userCash = db.execute("SELECT username, cash FROM users WHERE id = :user_id", user_id=userInfo['user_id']) #[0]["username"]
-    userInfo['username'] = userCash[0]['username']
+    userCash = db.execute("SELECT username, cash FROM users WHERE id = :user_id", user_id=session["user_id"]) #[0]["username"]
     availableCash = userCash[0]["cash"]
 
-    if not items:
-        return render_template("index.html", username=userCash[0]['username'],message="Portfolio is currently empty", availableCash=usd(availableCash), user_id=user_id, current_datetime=current_datetime)
-
-    # Set the username key to the actual username value
+    if request.method =="GET" and not items:
+        return render_template("index.html", username=userCash[0]['username'],message="Portfolio is currently empty", availableCash=usd(availableCash), user_id=session["user_id"], current_datetime=current_datetime.now().strftime("%c"), totalInvestments=usd(0))
     
+    else: # if GET and items
+        # Set the username key to the actual username value
+        portfolioSymbols = [i['symbol'] for i in items]
+        portfolioQuantities = [i['quantity'] for i in items]
+        costBasis = [i['total'] for i in items]
+        cnames = [i['name'] for i in items]
+        marketPrices = [lookup(i)['price'] for i in portfolioSymbols]
+        time.sleep(2) # wait for results.
 
-    portfolioSymbols = [i['symbol'] for i in items]
-    portfolioQuantities = [i['quantity'] for i in items]
-    costBasis = [i['total'] for i in items]
-    cnames = [i['name'] for i in items]
-    marketPrices = [lookup(i)['price'] for i in portfolioSymbols]
-    time.sleep(2) # wait for results.
+        portfolioBalances = []
+        totalInvestments = 0
+        for i in range(len(portfolioSymbols)):
+            stock = {}
+            stock['symbol'] = portfolioSymbols[i]
+            stock['name'] = cnames[i]
+            stock['shares'] = "{:,}".format(portfolioQuantities[i])
+            stock['costBasis'] = usd(costBasis[i] )
+            stock['marketValue'] = usd(portfolioQuantities[i]*marketPrices[i])
+            # totalInvestments += float(costBasis[i]) # costBasis
+            totalInvestments += float(portfolioQuantities[i]*marketPrices[i])
+            # stock['gainLoss'] = usd(float(stock['marketValue']) - float(stock['costBasis']))
+            portfolioBalances.append(stock)
 
-
-    portfolioBalances = []
-    totalInvestments = 0
-    for i in range(len(portfolioSymbols)):
-        stock = {}
-        stock['symbol'] = portfolioSymbols[i]
-        stock['name'] = cnames[i]
-        stock['shares'] = "{:,}".format(portfolioQuantities[i])
-        stock['costBasis'] = usd(costBasis[i] )
-        stock['marketValue'] = usd(portfolioQuantities[i]*marketPrices[i])
-        # totalInvestments += float(costBasis[i]) # costBasis
-        totalInvestments += float(portfolioQuantities[i]*marketPrices[i])
-        # stock['gainLoss'] = usd(float(stock['marketValue']) - float(stock['costBasis']))
-        portfolioBalances.append(stock)
-
-    if request.method == "GET":
         return render_template("index.html",
-                                username=userInfo['username'],
-                                items=portfolioBalances,
-                                current_datetime=current_datetime,
-                                availableCash=usd(availableCash),
-                                totalInvestments=usd(totalInvestments)
-    )
+                            username=session["username"],
+                            items=portfolioBalances,
+                            current_datetime=current_datetime.now().strftime("%c"),
+                            availableCash=usd(availableCash),
+                            totalInvestments=usd(totalInvestments)
+        )
 
 
 @app.route("/quote", methods=["GET", "POST"])
@@ -124,15 +114,17 @@ def quote():
     currentSearchHistory = []
     searchResultsHistory = []
 
-    results = db.execute("SELECT username, cash FROM users WHERE id = :user_id", user_id=userInfo['user_id']) #[0]["username"]
+    results = db.execute("SELECT username, cash FROM users WHERE id = :user_id", user_id=session["user_id"]) #[0]["username"]
     availableCash = results[0]["cash"]
     tickerInput = request.form.get("tickerInput")
 
     if request.method == "GET":
+        #current_datetime = datetime.now().strftime("%c")
         return render_template("quote1.html",
                                 username=results[0]['username'],
                                 availableCash=usd(availableCash),
-                                current_datetime=current_datetime)
+                                current_datetime=current_datetime.now().strftime("%c")
+        )
     else: # else if POST
         if searchCounter == 0:
             # first Search / POST
@@ -149,20 +141,20 @@ def quote():
             quote = lookup(tickerInput)
             currentSearchHistory.append(tickerInput)
 
-        
         # LookUp symbol to ensure it's valid on POST
         if not lookup(tickerInput):
             message = "Invalid Ticker Symbol. Please try another."
-            return render_template("quote1.html", username=results[0]['username'], availableCash=usd(availableCash), current_datetime=current_datetime, message=message)
+            #current_datetime = datetime.now().strftime("%c")
+            return render_template("quote1.html", username=results[0]['username'], availableCash=usd(availableCash), current_datetime=current_datetime.now().strftime("%c"), message=message)
 
-        # Increment the search counter for a successful search
+    # Increment the search counter for a successful search
         searchCounter += 1
-
+        #current_datetime = datetime.now().strftime("%c")
         lookUpResults = {
             'search_id' : searchCounter,
             'username' : results[0]['username'],
             'availableCash' : availableCash,
-            'current_datetime': current_datetime,
+            'current_datetime': current_datetime.now().strftime("%c"),
             'companyName' : quote["name"],
             'latestPrice' : quote["price"], #latestPrice
             'symbol' : quote["symbol"],
@@ -178,7 +170,7 @@ def quote():
         searchResultsHistory.append(lookUpResults)
 
         return render_template("buy.html",username=results[0]['username'],
-                                            current_datetime=current_datetime,
+                                            current_datetime=searchResultsHistory[-1]['current_datetime'],
                                             availableCash=usd(results[0]['cash']),
                                             companyName=searchResultsHistory[-1]['companyName'].upper(),
                                             latestPrice=usd(searchResultsHistory[-1]['latestPrice']),
@@ -192,18 +184,16 @@ def quote():
                                             avgTotalVolume=searchResultsHistory[-1]['avgTotalVolume'],
                                             primaryExchange=searchResultsHistory[-1]['primaryExchange'].upper()
                                             ,currentSearchHistory=currentSearchHistory[-1]
-                                            )
-    return redirect("/quote")
+        )
+    #return redirect("/quote")
 
 
 @app.route("/buyEstimator", methods=["POST"]) # after quote this displays the buy.html using this route
 @login_required
 def buyEstimator():
-
     # Scenario 1) first time, buyEStimateArray is Empty, and need to vet the sharesINput
     if request.method == "POST": # Here still on BUY.HTML, and user inputs into sharesInput
         global estimatedTotal # will pass this into the buy function | will need to differentiate for buy / sell 
-
         global sharesInput
         sharesInput = request.form.get("sharesInput")
 
@@ -212,8 +202,9 @@ def buyEstimator():
         if not sharesInput: # if there's nothing in the sharesInput or buyEstimatesArray
             # and the user clicks "Estimate", let user know to:
             message = 'To buy, you will first need to perform an estimate. Enter value in the "Buy Quantity".'
-            return render_template("buy.html",username=userInfo['username'],
-                                                current_datetime=current_datetime,
+            #current_datetime = datetime.now().strftime("%c")
+            return render_template("buy.html",username=session["username"],
+                                                current_datetime=current_datetime.now().strftime("%c"),
                                                 availableCash=usd(searchResultsHistory[-1]['availableCash']),
                                                 companyName=searchResultsHistory[-1]['companyName'].upper(),
                                                 latestPrice=usd(searchResultsHistory[-1]['latestPrice']),
@@ -231,7 +222,7 @@ def buyEstimator():
                                                 ,currentSearchHistory=currentSearchHistory[-1]
                                                 ,searchCounter=searchCounter
                                                 ,message=message
-                                                )
+            )
         # else if there is a sharesInput or something in the buyEsimtateArray
         # 1) vet the sharesInput 2) populate the buyEstimateArray items and let user know, if execute is pressed, then
         # the most current item in the buyEstimateArray (which needs to be displayed) will be excuted
@@ -252,8 +243,8 @@ def buyEstimator():
 
         else: # catch all - 
             message = 'Enter in a positive whole number for the quantity to produce an estimate.'
-            return render_template("buyExecute.html",username=userInfo['username'],
-                                            current_datetime=current_datetime,
+            return render_template("buyExecute.html",username=session["username"],
+                                            current_datetime=current_datetime.now().strftime("%c"),
                                             availableCash=usd(searchResultsHistory[-1]['availableCash']),
                                             companyName=searchResultsHistory[-1]['companyName'].upper(),
                                             latestPrice=usd(searchResultsHistory[-1]['latestPrice']),
@@ -269,14 +260,14 @@ def buyEstimator():
                                             ,currentSearchHistory=currentSearchHistory[-1]
                                             ,searchCounter=searchCounter
                                             ,message=message
-                                            )
+            )
 
         # After sharesInput has been validated, then calcuate / estimate
         if float(searchResultsHistory[-1]['availableCash']) < estimatedTotal:
             difference = estimatedTotal - float(searchResultsHistory[-1]['availableCash'])
             message = f"Insufficient funds. Balance is short: ${difference:,.2f} Please lower the amount of shares."
-            return render_template("buyExecute.html",username=userInfo['username'],
-                                            current_datetime=current_datetime,
+            return render_template("buyExecute.html",username=session["username"],
+                                            current_datetime=current_datetime.now().strftime("%c"),
                                             availableCash=usd(searchResultsHistory[-1]['availableCash']),
                                             companyName=searchResultsHistory[-1]['companyName'].upper(),
                                             latestPrice=usd(searchResultsHistory[-1]['latestPrice']),
@@ -292,14 +283,15 @@ def buyEstimator():
                                             ,currentSearchHistory=currentSearchHistory[-1]
                                             ,searchCounter=searchCounter
                                             ,message=message
-                                            )
+            )
         else:
             difference = float(searchResultsHistory[-1]['availableCash']) - estimatedTotal
             message = f"Estimate: {estimateQuantity} shares at current prices, the balance remaining will be: {usd(difference)}. "
 
         # Store all the details of the buyEstimate in an object
+        #current_datetime = datetime.now().strftime("%c")
         buyEstimate = {
-            'datetime': current_datetime,
+            'datetime': current_datetime.now().strftime("%c"),
             'price' : float(searchResultsHistory[-1]['latestPrice']),
             'quantity' : estimateQuantity,
             'total' : estimatedTotal,
@@ -311,9 +303,10 @@ def buyEstimator():
         }
         buyEstimatesArray.append(buyEstimate)
 
+        #current_datetime = datetime.now().strftime("%c")
         message = f'Clicking "Execute Order" will immediate place the order for: {buyEstimatesArray[-1]["quantity"]} Shares of {buyEstimatesArray[-1]["symbol"]} for {usd(buyEstimatesArray[-1]["total"])}. '
         return render_template("buyExecute.html", username=searchResultsHistory[-1]['username'],
-                                            current_datetime=searchResultsHistory[-1]['current_datetime'],
+                                            current_datetime=current_datetime.now().strftime("%c"),
                                             availableCash=usd(searchResultsHistory[-1]['availableCash']),
                                             companyName=searchResultsHistory[-1]['companyName'].upper(),
                                             latestPrice=usd(searchResultsHistory[-1]['latestPrice']),
@@ -333,71 +326,96 @@ def buyEstimator():
                                             ,searchCounter=searchCounter
                                             ,message=message
                                             # ,display=display
-                                        )
-    
-
+        )
 
 @app.route("/buy", methods=["POST"]) #this will render on buyExcute.html with this buyRoute
 @login_required
 def buy(): 
-    #scenario: Post, Empty currentSharesInput, and NO ESTIMATES in the buyEstimatesArray
-    # Result: return the buy.html
-    currentPrice = lookup(searchResultsHistory[-1]['symbol'])['price']
-    updatedTotal = float(currentPrice) * int(buyEstimatesArray[-1]['quantity'])
+    if request.method == "POST":
+        #scenario: Post, Empty currentSharesInput, and NO ESTIMATES in the buyEstimatesArray
+        # Result: return the buy.html
+        #current_datetime = datetime.now().strftime("%c")
+        currentPrice = lookup(searchResultsHistory[-1]['symbol'])['price']
+        updatedTotal = float(currentPrice) * int(buyEstimatesArray[-1]['quantity'])
 
-    db.execute("INSERT INTO companies (symbol, name, exchange) VALUES(:symbol, :name, :exchange) EXCEPT SELECT symbol, name, exchange FROM companies WHERE symbol = :symbol",
-        symbol=buyEstimatesArray[-1]['symbol'],
-        name=buyEstimatesArray[-1]['companyName'],
-        exchange=buyEstimatesArray[-1]['primaryExchange']
-    )
-    
-    c_id = db.execute("SELECT id FROM companies WHERE symbol = :symbol", symbol=buyEstimatesArray[-1]['symbol'])[0]['id']
-    #user_id = db.execute("SELECT id FROM users WHERE username = :username", username=buyEstimatesArray[-1]['username'])[0]['id']
+        if updatedTotal > float(searchResultsHistory[-1]['availableCash']):
+            difference = updatedTotal - float(searchResultsHistory[-1]['availableCash'])
+            message = f"Insufficient funds. Balance is short: ${difference:,.2f} Please lower the amount of shares."
+            return render_template("buy.html",username=session["username"],
+                                                current_datetime=current_datetime.now().strftime("%c"),
+                                                availableCash=usd(searchResultsHistory[-1]['availableCash']),
+                                                companyName=searchResultsHistory[-1]['companyName'].upper(),
+                                                latestPrice=usd(searchResultsHistory[-1]['latestPrice']),
+                                                symbol=searchResultsHistory[-1]['symbol'],
+                                                bidPrice=usd(searchResultsHistory[-1]['bidPrice']),
+                                                askPrice=usd(searchResultsHistory[-1]['askPrice']),
+                                                # sharesInput=sharesInput,
+                                                # estimatedTotal=estimatedTotal,
+                                                week52High=usd(searchResultsHistory[-1]['week52High']),
+                                                week52Low=usd(searchResultsHistory[-1]['week52Low']),
+                                                marketCap=searchResultsHistory[-1]['marketCap'],
+                                                volume=searchResultsHistory[-1]['volume'],
+                                                avgTotalVolume=searchResultsHistory[-1]['avgTotalVolume'],
+                                                primaryExchange=searchResultsHistory[-1]['primaryExchange'].upper()
+                                                ,currentSearchHistory=currentSearchHistory[-1]
+                                                ,searchCounter=searchCounter
+                                                ,message=message
+            )
+        
+        db.execute("INSERT INTO companies (symbol, name, exchange) VALUES(:symbol, :name, :exchange) EXCEPT SELECT symbol, name, exchange FROM companies WHERE symbol = :symbol",
+            symbol=buyEstimatesArray[-1]['symbol'],
+            name=buyEstimatesArray[-1]['companyName'],
+            exchange=buyEstimatesArray[-1]['primaryExchange']
+        )
+        
+        c_id = db.execute("SELECT id FROM companies WHERE symbol = :symbol", symbol=buyEstimatesArray[-1]['symbol'])[0]['id']
+        #user_id = db.execute("SELECT id FROM users WHERE username = :username", username=buyEstimatesArray[-1]['username'])[0]['id']
+        
+        buyExecute_datetime = current_datetime.now().strftime("%c")
+        db.execute("INSERT INTO transactions (datetime, ordertype, price, quantity, total, c_id, user_id) VALUES (:datetime, :orderType, :price, :quantity, :total, :c_id, :user_id)",
+            datetime=buyExecute_datetime,
+            orderType='BUY',
+            # price=buyEstimatesArray[-1]['price'],
+            price=currentPrice,
+            quantity=buyEstimatesArray[-1]['quantity'],
+            total=updatedTotal,
+            c_id=c_id,
+            user_id=session["user_id"]
+        )
 
-    db.execute("INSERT INTO transactions (datetime, ordertype, price, quantity, total, c_id, user_id) VALUES (:datetime, :orderType, :price, :quantity, :total, :c_id, :user_id)",
-        datetime=current_datetime,
-        orderType='BUY',
-        # price=buyEstimatesArray[-1]['price'],
-        price=currentPrice,
-        quantity=buyEstimatesArray[-1]['quantity'],
-        total=updatedTotal,
-        c_id=c_id,
-        user_id=userInfo['user_id']
-    )
+        trans_id = db.execute("SELECT trans_id FROM transactions WHERE user_id = :user_id ORDER BY datetime DESC LIMIT 1", user_id=session["user_id"])[0]['trans_id']
 
-    trans_id = db.execute("SELECT trans_id FROM transactions WHERE user_id = :user_id ORDER BY datetime DESC LIMIT 1", user_id=userInfo['user_id'])[0]['trans_id']
+        debit = 0 # Debit will be for Sells to increase cash balance
+        db.execute("INSERT INTO cash (datetime, debit, credit, user_id, trans_id) VALUES(:datetime, :debit, :credit, :user_id, :trans_id)",
+            datetime=buyExecute_datetime,
+            debit=debit,
+            credit=updatedTotal, # Buying decreases cash
+            user_id=session["user_id"],
+            trans_id=trans_id
+        )
 
-    debit = 0 # Debit will be for Sells to increase cash balance
-    db.execute("INSERT INTO cash (datetime, debit, credit, user_id, trans_id) VALUES(:datetime, :debit, :credit, :user_id, :trans_id)",
-        datetime=buyEstimatesArray[-1]['datetime'],
-        debit=debit,
-        credit=updatedTotal, # Buying decreases cash
-        user_id=userInfo['user_id'],
-        trans_id=trans_id
-    )
+        db.execute("UPDATE users SET cash = (SELECT TOTAL(debit - credit) AS balance FROM cash WHERE user_id = :user_id) ", user_id=session["user_id"])
 
-    db.execute("UPDATE users SET cash = (SELECT TOTAL(debit - credit) AS balance FROM cash WHERE user_id = :user_id) ", user_id=userInfo['user_id'])
+        # #Give the most recent transaction details - limit 1
+        confirmation = db.execute("SELECT t.ordertype, t.datetime, t.quantity, t.total, c.symbol, c.name FROM transactions t JOIN companies c ON t.c_id = c.id WHERE t.user_id = :user_id ORDER BY t.datetime DESC LIMIT 1", user_id=session["user_id"])
+        ordertype = confirmation[0]['ordertype']
+        datetime = confirmation[0]['datetime']
+        quantity = confirmation[0]['quantity']
+        total = confirmation[0]['total']
+        symbol = confirmation[0]['symbol']
+        companyName = confirmation[0]['name'] #companyName
 
-    # #Give the most recent transaction details - limit 1
-    confirmation = db.execute("SELECT t.ordertype, t.datetime, t.quantity, t.total, c.symbol, c.name FROM transactions t JOIN companies c ON t.c_id = c.id WHERE t.user_id = :user_id ORDER BY t.datetime DESC LIMIT 1", user_id=userInfo['user_id'])
-    ordertype = confirmation[0]['ordertype']
-    datetime = confirmation[0]['datetime']
-    quantity = confirmation[0]['quantity']
-    total = confirmation[0]['total']
-    symbol = confirmation[0]['symbol']
-    companyName = confirmation[0]['name'] #companyName
-
-    return render_template("confirmation.html", #display=buyEstimatesArray[-1]
-                                                c_id=c_id,
-                                                user_id=userInfo['user_id'],
-                                                trans_id=trans_id,
-                                                ordertype=ordertype,
-                                                datetime=datetime,
-                                                quantity=quantity,
-                                                total=usd(total),
-                                                symbol=symbol,
-                                                companyName=companyName
-    )
+        return render_template("confirmation.html", #display=buyEstimatesArray[-1]
+                                                    c_id=c_id,
+                                                    user_id=session["user_id"],
+                                                    trans_id=trans_id,
+                                                    ordertype=ordertype,
+                                                    datetime=datetime,
+                                                    quantity=quantity,
+                                                    total=usd(total),
+                                                    symbol=symbol,
+                                                    companyName=companyName
+        )
 
 
 @app.route("/history", methods=["GET"])
@@ -406,11 +424,11 @@ def history():
     """Show history of transactions"""
     if request.method == "GET":
         #refer to ERD for columns or print schema in the db
-        items = db.execute("SELECT * from transactions t JOIN companies c ON t.c_id = c.id WHERE user_id=:user_id GROUP BY t.c_id, t.ordertype ORDER BY datetime DESC, t.c_id;", user_id=userInfo['user_id'])
+        items = db.execute("SELECT * from transactions t JOIN companies c ON t.c_id = c.id WHERE user_id=:user_id GROUP BY t.c_id, t.ordertype ORDER BY datetime DESC, t.c_id;", user_id=session["user_id"])
 
-        return render_template("history.html",username=userInfo['username'],
+        return render_template("history.html",username=session["username"],
                                 items=items,
-                                current_datetime=current_datetime,
+                                current_datetime=current_datetime.now().strftime("%c")
         )
 
 
@@ -425,27 +443,24 @@ def login():
 
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
-
-        # Ensure username was submitted
-        # if not request.form.get("username"):
+        # Ensure username was submitted - if not request.form.get("username"):
         if not username:
             return apology("must provide username", 403)
 
-        # Ensure password was submitted
-        # elif not request.form.get("password"):
+        # Ensure password was submitted - elif not request.form.get("password"):
         elif not password:
             return apology("must provide password", 403)
 
         # Query database for username
         rows = db.execute("SELECT * FROM users WHERE username = :username", username=username)
         
-
         # Ensure username exists and password is correct
         if len(rows) != 1 or not check_password_hash(rows[0]["hash"], password):
             return apology("invalid username and/or password", 403)
 
         # Remember which user has logged in
         session["user_id"] = rows[0]["id"]
+        session["username"] = rows[0]["username"]
 
         # Redirect user to home page
         return redirect("/")
@@ -503,34 +518,42 @@ def register():
         email_result = db.execute("SELECT email_address FROM names WHERE email_address = :emailAddress", emailAddress=emailAddress)
         if len(username_result) >= 1:
             return render_template("register.html", message="Sorry this username is already taken.")
+        
         elif len(email_result) >= 1:
             return render_template("register.html", message="Sorry this email address is already taken. Perhaps you forogt your password?")
+        
         else:
             hash_pass = generate_password_hash(password)
             db.execute("INSERT INTO users (username, hash) VALUES(:username, :hash)", username=username, hash=hash_pass)
             user_id = db.execute("SELECT id FROM users WHERE username = :username", username=username)[0]['id']
             db.execute("INSERT INTO names (first_name, last_name, email_address) VALUES (:first_name, :last_name, :emailAddress)", first_name=first_name, last_name=last_name, emailAddress=emailAddress)
             db.execute("INSERT INTO cash (datetime, debit, credit, trans_id, user_id) VALUES(:datetime, :debit, :credit, :trans_id, :user_id)",
-                            datetime=current_datetime,
+                            datetime=current_datetime.now().strftime("%c"),
                             debit=10000,
                             credit=0,
-                            trans_id=0,
+                            trans_id='DEP',
                             user_id=user_id)
             return render_template("login.html", message="Account was successfully created. Please login now.")
     return redirect("/")
+
+@app.route("/about", methods=["GET"])
+def about():
+
+    if request.method == "GET":
+        return render_template("about.html")
 
 
 @app.route("/sellEstimator", methods=["GET", "POST"])
 @login_required
 def sellEstimator():
-    #message=""
-    userCash = db.execute("SELECT username, cash FROM users WHERE id = :user_id", user_id=userInfo['user_id']) #[0]["username"]
+
+    userCash = db.execute("SELECT username, cash FROM users WHERE id = :user_id", user_id=session["user_id"]) #[0]["username"]
     availableCash = userCash[0]["cash"]
     if request.method == "GET":
         counter = 0
         if counter == 0:
             try:
-                items = db.execute("WITH indexSetup AS ( SELECT u.username, c.symbol,  c.name, t.c_id, t.ordertype, SUM(t.quantity) as quantity, SUM(t.quantity * t.price) AS total FROM transactions t JOIN companies c ON t.c_id = c.id JOIN users u ON t.user_id = u.id WHERE user_id =:user_id GROUP BY  u.username, c.symbol, c.name, t.c_id, t.ordertype), sell as (SELECT username, symbol,  name, c_id, SUM(quantity) as quantity , SUM(total) AS costBasis FROM indexSetup WHERE ordertype = 'SELL' GROUP BY 1, 2, 3, 4), buy AS ( SELECT username, symbol,  name, c_id, SUM(quantity) as quantity , SUM(total) AS costBasis FROM indexSetup WHERE ordertype = 'BUY' GROUP BY 1, 2, 3, 4) SELECT username, symbol,  name, c_id, COALESCE(SUM(b.quantity - s.quantity), b.quantity) as quantity, COALESCE(SUM(b.costBasis - s.CostBasis), b.costBasis)  AS total FROM buy b LEFT JOIN sell s USING(username, symbol, name, c_id) GROUP BY 1, 2, 3, 4 ORDER BY name", user_id=userInfo['user_id'])
+                items = db.execute("WITH indexSetup AS ( SELECT u.username, c.symbol,  c.name, t.c_id, t.ordertype, SUM(t.quantity) as quantity, SUM(t.quantity * t.price) AS total FROM transactions t JOIN companies c ON t.c_id = c.id JOIN users u ON t.user_id = u.id WHERE user_id =:user_id GROUP BY  u.username, c.symbol, c.name, t.c_id, t.ordertype), sell as (SELECT username, symbol,  name, c_id, SUM(quantity) as quantity , SUM(total) AS costBasis FROM indexSetup WHERE ordertype = 'SELL' GROUP BY 1, 2, 3, 4), buy AS ( SELECT username, symbol,  name, c_id, SUM(quantity) as quantity , SUM(total) AS costBasis FROM indexSetup WHERE ordertype = 'BUY' GROUP BY 1, 2, 3, 4) SELECT username, symbol,  name, c_id, COALESCE(SUM(b.quantity - s.quantity), b.quantity) as quantity, COALESCE(SUM(b.costBasis - s.CostBasis), b.costBasis)  AS total FROM buy b LEFT JOIN sell s USING(username, symbol, name, c_id) GROUP BY 1, 2, 3, 4 ORDER BY name", user_id=session["user_id"])
                 # users = [i['username'] for i in items][0]
                 global portfolioSymbols
                 portfolioSymbols = [i['symbol'] for i in items]
@@ -543,7 +566,7 @@ def sellEstimator():
                 print(e)
 
         if not items:
-            return render_template("sell.html", availableCash=usd(availableCash), message="Portfolio is currently empty. No items to sell.")
+            return render_template("empty.html", availableCash=usd(availableCash), message="Portfolio is currently empty. No items to sell.")
         
         else: # data is available in the database, then gather it first and setup data structure
             for i in range(len(portfolioSymbols)):
@@ -553,8 +576,8 @@ def sellEstimator():
                 stock['shares'] = "{:,}".format(portfolioQuantities[i])
                 stock['costBasis'] = usd(costBasis[i])
                 stock['marketValue'] = usd(portfolioQuantities[i]*marketPrices[i])
-                stock['username'] = userInfo['username']
-                stock['user_id'] = userInfo['user_id']
+                stock['username'] = session["username"]
+                stock['user_id'] = session["user_id"]
                 # stock['gainLoss'] = usd(float(stock['marketValue']) - float(stock['costBasis']))
                 if stock in portfolioBalances:
                     pass # do not append if its already in the object
@@ -562,7 +585,7 @@ def sellEstimator():
                     portfolioBalances.append(stock)
                     counter += 1
 
-        return render_template("sell.html", username=portfolioBalances[-1]['username'], availableCash=usd(availableCash), items=portfolioBalances, current_datetime=current_datetime)
+            return render_template("sell.html", username=portfolioBalances[-1]['username'], availableCash=usd(availableCash), items=portfolioBalances, current_datetime=current_datetime.now().strftime("%c"))
 
     else: # if request.method == "POST":
         # Need to be able to access these variables in the next page route /sell
@@ -572,50 +595,57 @@ def sellEstimator():
         sellSymbol = request.form.get("sellSymbol").upper()
         sellSharesInput = request.form.get("sellSharesInput")
 
+        # Scenarios for missing inputs for  POST-ing to sellEstimator
+        if not sellSharesInput and not sellSymbol:
+            message = "Estimating a sell order requires Ticker Symbol you own and number of shares. "
+            return render_template("sell.html", username=portfolioBalances[-1]['username'], availableCash=usd(availableCash), items=portfolioBalances, current_datetime=current_datetime.now().strftime("%c"), message=message)
+
         if not sellSharesInput:
             message = "Estimating requires a whole quantity number. Enter a value in the Sell Quantity."
-            #return render_template("sell.html", username=users, items=portfolioBalances, current_datetime=current_datetime, option_list=portfolioSymbols)
-            return render_template("sell.html", username=portfolioBalances[-1]['username'], availableCash=usd(availableCash), items=portfolioBalances, current_datetime=current_datetime, message=message)
+            return render_template("sell.html", username=portfolioBalances[-1]['username'], availableCash=usd(availableCash), items=portfolioBalances, current_datetime=current_datetime.now().strftime("%c"), message=message)
 
         if sellSymbol not in portfolioSymbols:
             message = "Enter in a valid stock symbol in your portfolio."
-            return render_template("sell.html", username=portfolioBalances[-1]['username'], availableCash=usd(availableCash), items=portfolioBalances, current_datetime=current_datetime, message=message)
-
+            return render_template("sell.html", username=portfolioBalances[-1]['username'], availableCash=usd(availableCash), items=portfolioBalances, current_datetime=current_datetime.now().strftime("%c"), message=message)
+        
         # Store shareInput in a global variable for use in Execute Sell
         global sellEstimateQuantity
         sellEstimateQuantity = int(sellSharesInput)
 
-        # Validate Shares
+        # Validate Shares to be greater than 1 and only a number
         if sellEstimateQuantity >= 1:
             sellEstimatedTotal = float(lookup(sellSymbol)['price'] * sellEstimateQuantity)
-
-        elif sellEstimateQuantity == 0:
-            # sellEstimatedTotal = float(lookup(sellSymbol)['price']) * 0
-            sellEstimatedTotal = 0.00
+        # elif sellEstimateQuantity == 0:
+        #     # sellEstimatedTotal = float(lookup(sellSymbol)['price']) * 0
+        #     sellEstimatedTotal = 0.00
             # estimatedTotal = f'${estimatedTotal:,.2f}'
         else:
             message="Please enter in a valid quantity for estimates. "
-            return render_template("sell.html", username=portfolioBalances[-1]['username'], availableCash=usd(availableCash), items=portfolioBalances, current_datetime=current_datetime, message=message)
+            return render_template("sell.html", username=portfolioBalances[-1]['username'], availableCash=usd(availableCash), items=portfolioBalances, current_datetime=current_datetime.now().strftime("%c"), message=message)
 
-        # Compare shares owned (query db) vs sellEstimateQuantity
-        # If sellEsimateQuantity <= sharesowned{}: produce the estimate and store in variable for rendering
-        if int(portfolioBalances[-1]['shares']) <= sellEstimateQuantity:
-            difference = sellEstimateQuantity - int(portfolioBalances[-1]['shares'])
+        # Assuming quanitity is valid, loop thru the portfolioBalances, if symbol matches, return the quantity
+        sharesOwned = 0
+        for i in portfolioBalances:
+            if i['symbol'] == sellSymbol:
+                sharesOwned = int(i['shares'])
+
+        if sellEstimateQuantity > sharesOwned:
+            difference = sellEstimateQuantity - sharesOwned
             message = f"Cannot sell {difference} additional shares you do not own. Lower the amount of shares for an estimate."
             total = 0.00
-            return render_template("sell.html", username=portfolioBalances[-1]['username'], availableCash=usd(availableCash), items=portfolioBalances, current_datetime=current_datetime, message=message, sellEstimateQuantity=sellEstimateQuantity, sellEstimatedTotal=usd(total))
+            return render_template("sell.html", username=portfolioBalances[-1]['username'], availableCash=usd(availableCash), items=portfolioBalances, current_datetime=current_datetime.now().strftime("%c"), message=message, sellEstimateQuantity=sellEstimateQuantity, sellEstimatedTotal=usd(total))
         # Grab the stored variable if sellEstimateQuanitty passes, and store in a sell estimate object
 
         updatedSellQuote = lookup(sellSymbol)
         sellEstimate = {
-            'datetime': current_datetime,
+            'datetime': current_datetime.now().strftime("%c"),
             'price' : updatedSellQuote['price'], #lookup here
             'quantity': sellEstimateQuantity,
             'total' : float(updatedSellQuote['price'] * sellEstimateQuantity),
             'companyName': updatedSellQuote['name'],
             'symbol': sellSymbol.upper(),
             'primaryExchange' : updatedSellQuote['primaryExchange'],
-            'username' : userInfo['username'],
+            'username' : session["username"],
             'availableCash': availableCash
         }
         sellEstimatesArray.append(sellEstimate)
@@ -624,7 +654,7 @@ def sellEstimator():
         total = sellEstimatesArray[-1]['total']
         message = f'Clicking "Execute Order" will immediately place the following trade: {sellEstimatesArray[-1]["quantity"]} of {sellEstimatesArray[-1]["symbol"]} for {usd(sellEstimatesArray[-1]["total"])}. '
         
-        return render_template("sellExecute.html", username=portfolioBalances[-1]['username'], availableCash=usd(availableCash), items=portfolioBalances, current_datetime=current_datetime, message=message, sellEstimateQuantity=quantity, sellEstimatedTotal=usd(total), sellEstimateSymbol=sellEstimatesArray[-1]['symbol'], latestPrice=sellEstimatesArray[-1]['price'])
+        return render_template("sellExecute.html", username=portfolioBalances[-1]['username'], availableCash=usd(availableCash), items=portfolioBalances, current_datetime=current_datetime.now().strftime("%c"), message=message, sellEstimateQuantity=quantity, sellEstimatedTotal=usd(total), sellEstimateSymbol=sellEstimatesArray[-1]['symbol'], latestPrice=sellEstimatesArray[-1]['price'])
 
 @app.route("/sell", methods=["POST"])
 @login_required
@@ -634,31 +664,32 @@ def sell():
 
         # If there's is a valid sellEstimate in the array, then execute:
         c_id = db.execute("SELECT id FROM companies WHERE symbol = :symbol", symbol=sellEstimatesArray[-1]['symbol'])[0]['id']
+        sell_datetime = current_datetime.now().strftime("%c")
         db.execute("INSERT INTO transactions (datetime, ordertype, price, quantity, total, c_id, user_id) VALUES (:datetime, :orderType, :price, :quantity, :total, :c_id, :user_id)",
-            datetime=current_datetime,
+            datetime=sell_datetime,
             orderType='SELL',
             price=sellEstimatesArray[-1]['price'],
             quantity=(int(sellEstimatesArray[-1]['quantity'])),
             total=sellEstimatesArray[-1]['total'],
             c_id=c_id,
-            user_id=userInfo['user_id'] #global varible
+            user_id=session["user_id"] #global varible
         )
 
-        trans_id = db.execute("SELECT trans_id FROM transactions WHERE user_id = :user_id ORDER BY datetime DESC LIMIT 1", user_id=userInfo['user_id'])[0]['trans_id']
+        trans_id = db.execute("SELECT trans_id FROM transactions WHERE user_id = :user_id ORDER BY datetime DESC LIMIT 1", user_id=session["user_id"])[0]['trans_id']
 
         credit = 0 # Debit will be for Sells to increase cash balance
         db.execute("INSERT INTO cash (datetime, debit, credit, user_id, trans_id) VALUES(:datetime, :debit, :credit, :user_id, :trans_id)",
-            datetime=sellEstimatesArray[-1]['datetime'],
+            datetime=sell_datetime,
             debit=sellEstimatesArray[-1]['total'],
             credit=credit, # Buying decreases cash
-            user_id=userInfo['user_id'],
+            user_id=session["user_id"],
             trans_id=trans_id
         )
 
-        db.execute("UPDATE users SET cash = (SELECT TOTAL(debit - credit) AS balance FROM cash WHERE user_id = :user_id) ", user_id=userInfo['user_id'])
+        db.execute("UPDATE users SET cash = (SELECT TOTAL(debit - credit) AS balance FROM cash WHERE user_id = :user_id) ", user_id=session["user_id"])
 
         # #Give the most recent transaction details - limit 1
-        confirmation = db.execute("SELECT t.ordertype, t.datetime, t.quantity, t.total, c.symbol, c.name FROM transactions t JOIN companies c ON t.c_id = c.id WHERE t.user_id = :user_id ORDER BY t.datetime DESC LIMIT 1", user_id=userInfo['user_id'])
+        confirmation = db.execute("SELECT t.ordertype, t.datetime, t.quantity, t.total, c.symbol, c.name FROM transactions t JOIN companies c ON t.c_id = c.id WHERE t.user_id = :user_id ORDER BY t.datetime DESC LIMIT 1", user_id=session["user_id"])
         ordertype = confirmation[0]['ordertype']
         datetime = confirmation[0]['datetime']
         quantity = confirmation[0]['quantity']
@@ -668,10 +699,10 @@ def sell():
 
         return render_template("confirmation.html", #display=buyEstimatesArray[-1]
                                                     c_id=c_id,
-                                                    user_id=userInfo['user_id'],
+                                                    user_id=session["user_id"],
                                                     trans_id=trans_id,
                                                     ordertype=ordertype,
-                                                    datetime=datetime,
+                                                    datetime=current_datetime.now().strftime("%c"),
                                                     quantity=quantity,
                                                     total=usd(total),
                                                     symbol=symbol,
