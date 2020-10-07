@@ -1,1 +1,140 @@
-# bloomstrade
+# NewEgg.com WebScraper And Crawler For Laptops
+## April 2020
+
+
+![about](./readme_pics/0_about.png)
+
+
+## Scope & Purpose
+
+* I built a stock trading web application where users can invest stocks with a real-time stock quotes starting with $10,0000 of virtual money. This project is inspired by my passion for stock trading, computer science, and coding. This is a Python web application using Flask, Werkzeug exceptions and security, SQLite3, Requests, Jinja, Bootstrap4, Javascript, HTML5, and CSS3.
+
+
+## System Prerequisites To Get Started
+
+You will need the following installed on your computer system and import the following libraries:
+* Python >= 3.7
+* os
+* datetime
+* time
+* SQLite3
+* Flask and flash, jsonify, redirect, render_template, and request
+* Flask_session
+* tempfile
+* Werkzeug.exceptions and default_exceptions, HTTPException, InternalServerError
+* Werkzeug.security and check_password_hash, generate_password_hash
+
+
+## Getting Started
+
+* API Key from https://iexcloud.io/ as they are the real-time stock data provider
+
+* Clone / Download Entire Repository
+
+* Open up the terminal and navigate to the repository
+
+* Export your API_KEY into the terminal
+
+* Run "python application.py"
+
+
+## Main Built-in Functionalities
+
+* Password Hashing - this web application hashes the user's password upon account registration, so no real passwords are stored in the database
+
+* Portfolio Balance - presents users current investment portfolio
+
+* Quote & Buy - in a sequential three step process, the user may query for real time quotes, estimate a buy order, and execute a buy order followed buy a confirmation. Again, real-time quotes are provided by: https://iexcloud.io/
+
+* Sell - in a sequential two step process, users may estimate a sell order, and subsequently execute a sell order
+
+* Transaction History - view when all orders were place in the History page where the database displays all executed orders
+
+* Responsive Algorithm Preventing Errors - the algorithm will not allow users to purchase more shares of stock they can afford, or sell more shares than they have or do not own. The program will also instruct users what they need to fix in order to proceed
+
+
+## Web Application Walkthrough
+
+* Account Registration Page - all fields must be complete or application will return an error message
+![registration](./readme_pics/2_registration.png)
+
+* Registration Error - Example of an error message if a field is missing
+![registrationError](./readme_pics/2_registration.png)
+
+* Registration Complete
+![registrationComplete](./readme_pics/2a_complete.png)
+
+* Initial Login Page Of New Users
+![signedInEmpty](./readme_pics/3_signedin_empty.png)
+
+* Quote & Buy - Phase 1 - Enter in a Valid Stock Ticker
+![quotebuy1](./readme_pics/4_quotebuy.png)
+
+* Quote & Buy - Phase 2 - Enter in a Valid Stock Ticker
+![quotebuy2](./readme_pics/4a_searchResult.png)
+
+* Quote & Buy - Phase 3 - Enter in a Valid Stock Ticker
+![quotebuy3](./readme_pics/4b_buyEstimateResult.png)
+
+* Quote & Buy - Phase 3b - If user click's "Estimate" with a blank quantity
+![quotebuy3b](./readme_pics/4c_error_prevention_buyEstimate.png)
+
+* Buy Confirmation
+![quotebuyConfirm](./readme_pics/4d_confirmation.png)
+
+* Portfolio View 
+![portfolio](./readme_pics/5_portfolio.png)
+
+* Sell - Phase 1 Estimate Order
+![sell1](./readme_pics/6a_sellError_no_input.png)
+
+* Sell - Phase 1a Estimate Order - Error Example Invalid "Sell Quantity"
+![sell2](./readme_pics/6_sellError_quantity.png)
+
+* Sell - Phase 1b Estimate Order - Error Example Invalid Stock Symbol
+![sell3](./readme_pics/6b_sellError_symbol.png)
+
+* Sell - Phase 2 Successful Estimate Order
+![sell4](./readme_pics/6c_sellEstimate.png)
+
+* Sell Confirmation
+![sell4](./readme_pics/6d_sellConfirmation.png)
+
+* Transaction History
+![history](./readme_pics/7_history.png)
+
+* Portfolio View After Sale
+![portfolioAfterSale](./readme_pics/8_portfolioAfterSale.png)
+
+* Database Structure Design - Entity Relationship Diagram
+![erd](./readme_pics/9_finance_db_ERD.png)
+
+
+
+## Next Steps Considerations
+
+* Use Regular Expressions to vet unwanted inputs
+  
+* Update to production grade database infrastructure using PostGres SQL and deploy using Heroku
+
+* Create function to allow users to change passwords or add more money
+
+
+### Personal Note
+
+* Hope you enjoyed it. Thank you for your time!
+
+## Author
+
+* **Johneson Giang** - *Invidual Project* - [Github](https://github.com/jhustles)
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+
+## Acknowledgments & Credits
+
+* Shout out to CS50 @ Harvard EDX
+* BootStrap4 Free Templates - Kelly
+
+* I definitely want to give a shout out to my dear teacher, mentor, and friend @CodingWithCorgis!
