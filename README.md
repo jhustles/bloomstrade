@@ -36,6 +36,11 @@ You will need the following installed on your computer system and import the fol
 
 * Run "python application.py"
 
+## Code Review - Recruiters / Hiring Managers
+
+* Please view the application.py - here is where most of my Python logic and coding remains, including most of my SQL queries (e.g. common expression tables, Insert, and Update queries)
+
+* Jinja Templates are in the "templates" folder where I created a layout, and created several custom dynamic pages
 
 ## Main Built-in Functionalities
 
