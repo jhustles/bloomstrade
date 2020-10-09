@@ -46,11 +46,11 @@ You will need the following installed on your computer system and import the fol
 
 * Password Hashing - this web application hashes the user's password upon account registration, so no real passwords are stored in the database
 
-* Portfolio Balance - presents users current investment portfolio
+* Portfolio Balance - presents users current investment portfolio and cash position. Default new users start with $10,000.
 
-* Quote & Buy - in a sequential three step process, the user may query for real time quotes, estimate a buy order, and execute a buy order followed buy a confirmation. Again, real-time quotes are provided by: https://iexcloud.io/
+* Quote & Buy - in a three step process, the user will first query for a stock ticker, perform a buy estimate, and either executes a buy order, or not, using real time API quotes provided by IEX Cloud (https://iexcloud.io/) This process is concluded with a buy order confirmation
 
-* Sell - in a sequential two step process, users may estimate a sell order, and subsequently execute a sell order
+* Sell - in a two step process, users may estimate, and subsequently, execute a sell order
 
 * Transaction History - view when all orders were place in the History page where the database displays all executed orders
 
@@ -119,7 +119,7 @@ You will need the following installed on your computer system and import the fol
 
 * Use Regular Expressions to vet unwanted inputs
   
-* Update to production grade database infrastructure using PostGres SQL and deploy using Heroku
+* Update to production grade database infrastructure using PostGres SQL and deploy using Heroku because of it's free cost structure for dynamic data
 
 * Create function to allow users to change passwords or add more money
 
