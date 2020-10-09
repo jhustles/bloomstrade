@@ -63,7 +63,7 @@ You will need the following installed on your computer system and import the fol
 ![registration](./readme_pics/1_registration.png)
 
 * Registration Error - Example of an error message if a field is missing
-![registrationError](./readme_pics/1a_registration.png)
+![registrationError](./readme_pics/1a_registration_error.png)
 
 * Registration Complete
 ![registrationComplete](./readme_pics/2a_complete.png)
