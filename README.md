@@ -113,6 +113,22 @@ You will need the following installed on your computer system and import the fol
 * Database Structure Design - Entity Relationship Diagram
 ![erd](./readme_pics/9_finance_db_ERD.png)
 
+* Flask App Snippets - Python, Flask and SQLite3
+![1](./readme_pics/code_snippets/1.png)
+![2](./readme_pics/code_snippets/2.png)
+![3](./readme_pics/code_snippets/3.png)
+![4](./readme_pics/code_snippets/4.png)
+![5](./readme_pics/code_snippets/5.png)
+![6](./readme_pics/code_snippets/6.png)
+![7](./readme_pics/code_snippets/7.png)
+![8](./readme_pics/code_snippets/8.png)
+![9](./readme_pics/code_snippets/9.png)
+![10](./readme_pics/code_snippets/10.png)
+![11](./readme_pics/code_snippets/11.png)
+![12](./readme_pics/code_snippets/12.png)
+![13](./readme_pics/code_snippets/13.png)
+![14](./readme_pics/code_snippets/14.png)
+
 
 
 ## Next Steps Considerations
@@ -138,7 +154,7 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 ## Acknowledgments & Credits
 
-* Shout out to CS50 @ Harvard EDX
+* Shout out to David J. Mahlan and Brian Yu
 * BootStrap4 Free Templates - Kelly
 
 * I definitely want to give a shout out to my dear teacher, mentor, and friend @CodingWithCorgis!
